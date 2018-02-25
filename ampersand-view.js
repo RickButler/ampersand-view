@@ -281,6 +281,9 @@ assign(View.prototype, {
                     this.registerSubview(subview);
                 }
                 this.off('change', action);
+                if (opts.bubbleEvents) { 
+                    this.listenTo(subview, opts.bubbleEvents, this._getCachedEventBubblingHandler(name));
+                }
             }
         }
         // we listen for main `change` items
@@ -298,6 +301,7 @@ assign(View.prototype, {
     _parseSubviewOpts: function (subview) {
         var self = this;
         var opts = {
+            bubbleEvents: isString(subview.bubbleEvents) ? subview.bubbleEvents : subview.bubbleEvents && 'all',      
             selector: subview.selector || '[data-hook="' + subview.hook + '"]',
             waitFor: subview.waitFor || '',
             prepareView: subview.prepareView || function () {
