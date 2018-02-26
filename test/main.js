@@ -6,7 +6,7 @@ var AmpersandView = require('../ampersand-view');
 var contains = function (str1, str2) {
     return str1.indexOf(str2) !== -1;
 };
-/*
+
 var Model = AmpersandModel.extend({
     props: {
         id: 'number',
@@ -996,8 +996,8 @@ test('the subviews array is empty after the parent view is removed', function(t)
     parent.remove();
     t.equal(parent._subviews.length, 0, 'removes child view from subviews array');
 });
-*/
-test('event bubbling for subivews is initialize and removed correctly', function (t) {
+
+test('event bubbling for subviews', function (t) {
     var Sub = AmpersandView.extend({
         props: {
             testvalue: 'number'
@@ -1028,15 +1028,15 @@ test('event bubbling for subivews is initialize and removed correctly', function
     var testvalue;
     var testvalueChanged = false;
 
-    view.on('change:sub1.testvalue', function (value) {
+    view.on('change:sub1.testvalue', function (view, value) {
         testvalue = value;        
         testvalueChanged = true;
     });
 
     view.sub1.testvalue = 1;
 
-    t.equal(testvalueChanged, true);
-    t.equal(view.sub1.testvalue, 1);
+    t.equal(testvalueChanged, true, 'event was triggered for test value');
+    t.equal(view.sub1.testvalue, testvalue, 'event value and test value match');
 
     view.remove();
     view.render();
@@ -1044,8 +1044,8 @@ test('event bubbling for subivews is initialize and removed correctly', function
     testvalueChanged = false;
     view.sub1.testvalue = 2;
 
-    t.equal(testvalueChanged, true);
-    t.equal(view.sub1.testvalue, 2);
+    t.equal(testvalueChanged, true, 'event was triggered after remove then re-render');
+    t.equal(view.sub1.testvalue, 2, 'event value and test value match after remove then re-render');
 
     t.end();
 });
