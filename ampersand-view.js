@@ -274,6 +274,9 @@ assign(View.prototype, {
             if (!this.el || !(el = this.query(opts.selector))) return;
             if (!opts.waitFor || getPath(this, opts.waitFor)) {
                 subview = this[name] = opts.prepareView.call(this, el);
+                if (opts.bubbleEvents) { 
+                    this.listenTo(subview, opts.bubbleEvents, this._getCachedEventBubblingHandler(name));
+                }
                 if (!subview.el) {
                     this.renderSubview(subview, el);
                 } else {
@@ -281,9 +284,7 @@ assign(View.prototype, {
                     this.registerSubview(subview);
                 }
                 this.off('change', action);
-                if (opts.bubbleEvents) { 
-                    this.listenTo(subview, opts.bubbleEvents, this._getCachedEventBubblingHandler(name));
-                }
+ 
             }
         }
         // we listen for main `change` items
@@ -332,7 +333,7 @@ assign(View.prototype, {
         return this;
     },
 
-    // ## cacheElements
+    // ## cacheElemen
     // This is a shortcut for adding reference to specific elements within your view for
     // access later. This avoids excessive DOM queries and makes it easier to update
     // your view if your template changes.
