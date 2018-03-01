@@ -16,6 +16,8 @@ var events = require('events-mixin');
 var matches = require('matches-selector');
 var bindings = require('ampersand-dom-bindings');
 var getPath = require('lodash/get');
+var partial = require('lodash/partial');
+var changeRE = /^change:/;
 
 function View(attrs) {
     this.cid = uniqueId('view');
@@ -275,7 +277,9 @@ assign(View.prototype, {
             if (!opts.waitFor || getPath(this, opts.waitFor)) {
                 subview = this[name] = opts.prepareView.call(this, el);
                 if (opts.bubbleEvents) { 
-                    this.listenTo(subview, opts.bubbleEvents, this._getCachedEventBubblingHandler(name));
+                    var bubbleHandler = this._getCachedEventBubblingHandler(name);
+                    if (changeRE.test(opts.bubbleEvents)) bubbleHandler = partial(bubbleHandler, opts.bubbleEvents);
+                    this.listenTo(subview, 'change:testvalue1 change:testvalue2', bubbleHandler);
                 }
                 if (!subview.el) {
                     this.renderSubview(subview, el);

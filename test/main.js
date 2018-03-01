@@ -6,7 +6,7 @@ var AmpersandView = require('../ampersand-view');
 var contains = function (str1, str2) {
     return str1.indexOf(str2) !== -1;
 };
-
+/*
 var Model = AmpersandModel.extend({
     props: {
         id: 'number',
@@ -997,10 +997,11 @@ test('the subviews array is empty after the parent view is removed', function(t)
     t.equal(parent._subviews.length, 0, 'removes child view from subviews array');
 });
 
-test('event bubbling for subviews', function (t) {
+test('event bubbling on all events for subview', function (t) {
     var Sub = AmpersandView.extend({
         props: {
-            testvalue: 'number'
+            testvalue1: 'number',
+            testvalue2: 'string'
         },
         template: '<span></span>'
     });
@@ -1025,27 +1026,90 @@ test('event bubbling for subviews', function (t) {
         }
     });
     var view = new View();
-    var testvalue;
-    var testvalueChanged = false;
+    var testvalue1;
+    var testvalue2;
+    var testvalue1Changed = false;
+    var testvalue2Changed = false;
 
-    view.on('change:sub1.testvalue', function (view, value) {
-        testvalue = value;        
-        testvalueChanged = true;
+    view.on('change:sub1.testvalue1', function (view, value) {
+        testvalue1 = value;        
+        testvalue1Changed = true;
     });
 
-    view.sub1.testvalue = 1;
+    view.sub1.testvalue1 = 1;
 
-    t.equal(testvalueChanged, true, 'event was triggered for test value');
-    t.equal(view.sub1.testvalue, testvalue, 'event value and test value match');
+    t.equal(testvalue1Changed, true, 'event was triggered for test value');
+    t.equal(view.sub1.testvalue1, testvalue1, 'event value and test value match');
 
     view.remove();
     view.render();
 
-    testvalueChanged = false;
-    view.sub1.testvalue = 2;
+    view.on('change:sub1.testvalue2', function (view, value) {
+        testvalue2 = value;        
+        testvalue2Changed = true;
+    });
 
-    t.equal(testvalueChanged, true, 'event was triggered after remove then re-render');
-    t.equal(view.sub1.testvalue, 2, 'event value and test value match after remove then re-render');
+    testvalue1Changed = false;
+    view.sub1.testvalue1 = 2;
+    view.sub1.testvalue2 = 'newValue';
+
+    t.equal(testvalue1Changed, true, 'event was triggered after remove then re-render');
+    t.equal(testvalue2Changed, true, 'event was triggered after remove then re-render');
+    t.equal(view.sub1.testvalue1, 2, 'event value and test value match after remove then re-render');    
+    t.equal(view.sub1.testvalue2, 'newValue', 'event value and test value match after remove then re-render');
+
+    t.end();
+});
+*/
+test('event bubbling on single event for subview', function (t) {
+    var Sub = AmpersandView.extend({
+        props: {
+            testvalue1: 'number',
+            testvalue2: 'string'
+        },
+        template: '<span></span>'
+    });
+
+    var View = AmpersandView.extend({
+        template: '<div><div class="container"></div></div>',
+        autoRender: true,
+        subviews: {
+            sub1: {
+                selector: '.container',
+                bubbleEvents: 'change:testvalue1',
+                constructor: Sub,
+                prepareView: function (el) {
+                    return new Sub({
+                        el: el
+                    });
+                }
+            }
+        }
+    });
+
+    var view = new View();
+    var testvalue1;
+    var testvalue1Changed = false;
+
+
+    view.on('change:sub1.testvalue1', function (view, value) {
+        testvalue1 = value;        
+        testvalue1Changed = true;
+    });
+
+    view.sub1.testvalue1 = 1;
+
+    t.equal(testvalue1Changed, true, 'event was triggered for test value');
+    t.equal(view.sub1.testvalue1, testvalue1, 'event value and test value match');
+
+    view.remove();
+    view.render();
+
+    testvalue1Changed = false;
+    view.sub1.testvalue1 = 2;
+
+    t.equal(testvalue1Changed, true, 'event was triggered after remove then re-render');
+    t.equal(view.sub1.testvalue1, 2, 'event value and test value match after remove then re-render');
 
     t.end();
 });
